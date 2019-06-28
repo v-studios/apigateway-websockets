@@ -2,8 +2,7 @@ service: severless-ws-test
 
 provider:
   name: aws
-  runtime: nodejs10.x
-  websocketsApiName: websockets-test-api
+  runtime: nodejs8.10
   profile: stepfunctions-user
   iamRoleStatements:
     - Effect: "Allow"
@@ -13,7 +12,7 @@ provider:
         - "dynamodb:DeleteItem"
         - "dynamodb:Scan"
       Resource:
-        - fn::GetAtt: [ChatTable, Arn]
+        - Fn::GetAtt: [ChatTable, Arn]
     - Effect: "Allow"
       Action:
         - "execute-api:ManageConnections"
@@ -26,7 +25,7 @@ functions:
     events: 
       - websocket: 
           route: $connect
-      - webssocket: 
+      - websocket: 
           route: $disconnect
   defaultHandler: 
     handler: handler.defaultHandler

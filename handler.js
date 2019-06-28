@@ -10,7 +10,7 @@ const CHATCONNECTION_TABLE = 'chatIdTable';
 const successfullResponse = {
   statusCode: 200,
   body: 'everything is alright'
-}
+};
 
 module.exports.connectionHandler = (event, context, callback) => {
   console.log(event);
@@ -38,8 +38,8 @@ module.exports.connectionHandler = (event, context, callback) => {
           body: 'Failed to connect: ' + JSON.stringify(err)
         });
       });
-    }
-}
+  }
+};
 
 module.exports.defaultHandler = (event, context, callback) => {
   console.log('defaultHandler was called');
@@ -53,14 +53,14 @@ module.exports.defaultHandler = (event, context, callback) => {
 
 module.exports.sendMessageHandler = (event, context, callback) => {
   sendMessageToAllConnected(event).then(() => {
-    callback(null, successfullResponse);
+    callback(null, successfullResponse)
   }).catch (err => {
     callback(null, JSON.stringify(err))
   });
 }
 
 const sendMessageToAllConnected = (event) => {
-  return getConnectionIds().then((connectionData) => {
+  return getConnectionIds().then(connectionData => {
     return connectionData.Items.map(connectionId => {
       return send(event, connectionId.connectionId);
     });

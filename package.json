@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/pchinjr/apigateway-websockets/issues"
   },
-  "homepage": "https://github.com/pchinjr/apigateway-websockets#readme"
+  "homepage": "https://github.com/pchinjr/apigateway-websockets#readme",
+  "dependencies": {
+    "aws-sdk": "^2.474.0",
+    "serverless-websockets-plugin": "^1.0.0"
+  }
 }
