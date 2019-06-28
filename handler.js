@@ -19,7 +19,7 @@ module.exports.connectionHandler = (event, context, callback) => {
     //handle connection
     addConnection(event.requestContext.connectionId)
       .then(() => {
-        callbback(null, successfullResponse);
+        callback(null, successfullResponse);
       })
       .catch(err => {
         console.log(err);
