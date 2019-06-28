@@ -53,11 +53,11 @@ module.exports.defaultHandler = (event, context, callback) => {
 
 module.exports.sendMessageHandler = (event, context, callback) => {
   sendMessageToAllConnected(event).then(() => {
-    callback(null, successfullResponse)
+    callback(null, successfullResponse);
   }).catch (err => {
-    callback(null, JSON.stringify(err))
+    callback(null, JSON.stringify(err));
   });
-}
+};
 
 const sendMessageToAllConnected = (event) => {
   return getConnectionIds().then(connectionData => {
@@ -65,7 +65,7 @@ const sendMessageToAllConnected = (event) => {
       return send(event, connectionId.connectionId);
     });
   });
-}
+};
 
 const getConnectionIds = () => {
   const params = {
@@ -74,15 +74,15 @@ const getConnectionIds = () => {
   };
 
   return dynamo.scan(params).promise();
-}
+};
 
 const send = (event, connectionId) => {
   const body = JSON.parse(event.body);
   const postData = body.data;
 
-  const endpoint = event.requestContext.domainName + "/" + event.requestContext.stage;
+  const endpoint = `${event.requestContext.domainName  }/${  event.requestContext.stage}`;
   const apigwManagementApi = new AWS.ApiGatewayManagementApi({
-    apiVersion: "2018-11-29",
+    apiVersion: '2018-11-29',
     endpoint: endpoint
   });
 
@@ -91,7 +91,7 @@ const send = (event, connectionId) => {
     Data: postData
   };
   return apigwManagementApi.postToConnection(params).promise();
-}
+};
 
 const addConnection = connectionId => {
   const params = {
@@ -102,7 +102,7 @@ const addConnection = connectionId => {
   };
 
   return dynamo.put(params).promise();
-}
+};
 
 const deleteConnection = connectionId => {
   const params = {
