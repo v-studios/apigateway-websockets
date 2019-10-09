@@ -1,7 +1,7 @@
 {
   "name": "apigateway-websockets",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.2",
+  "description": "Translate Paul Chin Jr.'s lightning talk demo to Python",
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,10 +18,15 @@
   "homepage": "https://github.com/pchinjr/apigateway-websockets#readme",
   "dependencies": {
     "aws-sdk": "^2.474.0",
+    "serverless": "^1.54.0",
     "serverless-websockets-plugin": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^6.0.1",
     "eslint-config-cloudreach": "^1.0.2"
-  }
+  },
+  "keywords": [
+    "serverless",
+    "websockets"
+  ]
 }
