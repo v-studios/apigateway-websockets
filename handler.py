@@ -5,7 +5,7 @@ import boto3
 
 CHATCONNECTION_TABLE = 'chatIdTable'
 
-dynamo = boto3.client('dynamodb')
+dynamo = boto3.resource('dynamodb').Table(CHATCONNECTION_TABLE)
 
 successfullResponse = {
   'statusCode': 200,
@@ -72,7 +72,7 @@ def sendMessageToAllConnected(event):
     items = getConnectionIds()['Items']
     print(f'# sendMessageToAllConnected ids={items}')
     for item in items:
-        cid = item['connectionId']['S']  # decode DynamoDB format
+        cid = item['connectionId']
         try:                    # we may have stale connections
             print(f'# sendMessageToAllConnected id={cid}')
             send(event, cid, body)
@@ -83,8 +83,7 @@ def sendMessageToAllConnected(event):
 
 def getConnectionIds():
     print(f'getConnectionIds...')
-    return dynamo.scan(TableName=CHATCONNECTION_TABLE,
-                       ProjectionExpression='connectionId')
+    return dynamo.scan(ProjectionExpression='connectionId')
 
 
 def send(event, connectionId, body) :
@@ -103,11 +102,9 @@ def send(event, connectionId, body) :
 
 def addConnection(connectionId):
     print(f'addConnection id={connectionId}')
-    return dynamo.put_item(TableName=CHATCONNECTION_TABLE,
-                           Item={'connectionId': {'S': connectionId}})
+    return dynamo.put_item(Item={'connectionId': connectionId})
 
 
 def deleteConnection(connectionId):
     print(f'deleteConnection id={connectionId}')
-    return dynamo.delete_item(TableName=CHATCONNECTION_TABLE,
-                              Key={'connectionId': {'S': connectionId}})
+    return dynamo.delete_item(Key={'connectionId': connectionId})
