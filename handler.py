@@ -1,4 +1,5 @@
 import json
+import os
 
 import boto3
 
@@ -37,9 +38,14 @@ def connectionHandler(event, context):
 
 
 def defaultHandler(event, context):
+    """If we don't get a route match, it comes here; send back a warning."""
     print(f'### defaultHandler event={json.dumps(event)}')
-    body = event['body']
-    print(f'### defaultHandler body={json.dumps(body)}')
+    cid = event['requestContext']['connectionId']
+    endpoint = f'https://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
+    print(f'### defaultHandler endpoint={endpoint}')
+    apigapi = boto3.client('apigatewaymanagementapi', endpoint_url=endpoint)
+    ret = apigapi.post_to_connection(ConnectionId=cid, Data='UNMATCHED ROUTE')
+    print(f'### defaultHandler ret={json.dumps(ret)}')
     return successfullResponse
 
 
@@ -56,11 +62,13 @@ def sendMessageHandler(event, context):
 def sendMessageToAllConnected(event):
     print('# sendMessageToAllConnected...')
     connectionData = getConnectionIds()
-    print(f'# sendMessageToAllConnected Items={connectionData["Items"]}')
-    for connectionId in connectionData['Items']:
+    connection_ids = connectionData["Items"]
+    print(f'# sendMessageToAllConnected ids={connection_ids}')
+    for connectionId in connection_ids:
         try:                    # we may have stale connections
             print(f'# sendMessageToAllConnected id={connectionId}')
-            send(event, connectionId.connectionId)
+            body = json.loads(event['body']);
+            send(event, connectionId, body)
             print(f'# sendMessageToAllConnected id={connectionId} ok')
         except Exception as e:
             print(f'# sendMessageToAllConnected id={connectionId} failed, ignoring')
@@ -72,9 +80,8 @@ def getConnectionIds():
                        ProjectionExpression='connectionId')
 
 
-def send(event, connectionId) :
+def send(event, connectionId, body) :
     print(f'## send event={json.dumps(event)}')
-    body = json.loads(event['body']);
     print(f'## send body=={json.dumps(body, indent=2)}')
     postData = body['data'];
     print(f'## send postData=={json.dumps(postData, indent=2)}')
