@@ -26,6 +26,5 @@ function sendAndClear(message) {
 
 function updateChat(messageEvent) { // Update chat-panel and list of connected users
     console.log(messageEvent)
-    let data = messageEvent.data // don't I have to JSON.parse() it? only if nonstring?
-    id("chat").insertAdjacentHTML("afterbegin", data);
+    id("chat").textContent = messageEvent.data; // replace any old chat data with new
 }
