@@ -42,9 +42,9 @@ def defaultHandler(event, context):
     print(f'### defaultHandler event={json.dumps(event)}')
     cid = event['requestContext']['connectionId']
     endpoint = f'https://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
-    print(f'### defaultHandler endpoint={endpoint}')
     apigapi = boto3.client('apigatewaymanagementapi', endpoint_url=endpoint)
-    ret = apigapi.post_to_connection(ConnectionId=cid, Data='UNMATCHED ROUTE')
+    ret = apigapi.post_to_connection(ConnectionId=cid,
+                                     Data=f'UNMATCHED ROUTE body={event["body"]}')
     print(f'### defaultHandler ret={json.dumps(ret)}')
     return successfullResponse
 
@@ -60,18 +60,25 @@ def sendMessageHandler(event, context):
 
 
 def sendMessageToAllConnected(event):
+    """Pull the 'route' off the body and send it out to everyone."""
     print('# sendMessageToAllConnected...')
-    connectionData = getConnectionIds()
-    connection_ids = connectionData["Items"]
-    print(f'# sendMessageToAllConnected ids={connection_ids}')
-    for connectionId in connection_ids:
+    body = event['body']        # stringy json '{"route": "sendMessage", "data": "stuff"}'
+    print(f'# sendMessageToAllConnected body={body} type={type(body)}')
+    try:
+        body = json.loads(body)
+        body = body['data']
+    except Exception as err:
+        print(f'# sendMessageToAllConnected ERR could not unpack str to json body={body}')
+    items = getConnectionIds()['Items']
+    print(f'# sendMessageToAllConnected ids={items}')
+    for item in items:
+        cid = item['connectionId']['S']  # decode DynamoDB format
         try:                    # we may have stale connections
-            print(f'# sendMessageToAllConnected id={connectionId}')
-            body = json.loads(event['body']);
-            send(event, connectionId, body)
-            print(f'# sendMessageToAllConnected id={connectionId} ok')
+            print(f'# sendMessageToAllConnected id={cid}')
+            send(event, cid, body)
+            print(f'# sendMessageToAllConnected id={cid} ok')
         except Exception as e:
-            print(f'# sendMessageToAllConnected id={connectionId} failed, ignoring')
+            print(f'# sendMessageToAllConnected id={cid} failed, ignoring')
 
 
 def getConnectionIds():
@@ -81,15 +88,17 @@ def getConnectionIds():
 
 
 def send(event, connectionId, body) :
-    print(f'## send event={json.dumps(event)}')
-    print(f'## send body=={json.dumps(body, indent=2)}')
-    postData = body['data'];
-    print(f'## send postData=={json.dumps(postData, indent=2)}')
+    # print(f'## send event={json.dumps(event)}')
+    if not isinstance(body, str):
+        body = json.dumps(body)
+    #print(f'## send body=={body}')
     endpoint = f'https://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
-    apigwManagementApi = boto3.client('apigatewaymanagementapi', endpoint=endpoint)
-    print(f'## send apigma=={apigwManagementApi}')
-    return apigwManagementApi.post_to_connection(ConnectionId=connectionId,
-                                                 Data=postData)
+    apigapi = boto3.client('apigatewaymanagementapi', endpoint_url=endpoint)
+    try:
+        ret = apigapi.post_to_connection(ConnectionId=connectionId, Data=body)
+        print(f'#### send ret={ret}')
+    except Exception as err:
+        print(f'### send ERROR err={err}')
 
 
 def addConnection(connectionId):
