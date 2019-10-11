@@ -2,8 +2,11 @@ service: severless-ws-test
 
 provider:
   name: aws
-  runtime: nodejs8.10
-  profile: stepfunctions-user
+  runtime: python3.7
+  #runtime: nodejs8.10
+  #profile: stepfunctions-user
+  #websocketsApiName: custom-websockets-api-name # Use a custom name for the websockets API
+  websocketsApiRouteSelectionExpression: $request.body.route # custom route selection expression
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -18,6 +21,18 @@ provider:
         - "execute-api:ManageConnections"
       Resource: 
         - "arn:aws:execute-api:*:*:**/@connections/*"
+
+package:
+  exclude:
+    - exclude-me.js
+    - node_modules/**
+    - package-lock.json
+    - package.json
+    - yarn.lock
+    - __pycache__/**
+    - "*~"
+    - "*html"
+    - "*js"
 
 functions:
   connectionHandler:
@@ -36,7 +51,7 @@ functions:
     handler: handler.sendMessageHandler
     events:
       - websocket:
-          route: sendMessage
+          route: sendMessage    # trigger on: $request.body.route = sendMessage
 
 resources:
   Resources:
