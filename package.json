@@ -18,7 +18,7 @@
   "homepage": "https://github.com/pchinjr/apigateway-websockets#readme",
   "dependencies": {
     "aws-sdk": "^2.474.0",
-    "serverless": "^1.54.0",
+    "serverless": "^3.25.1",
     "serverless-websockets-plugin": "^1.0.0"
   },
   "devDependencies": {
